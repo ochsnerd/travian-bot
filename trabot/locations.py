@@ -24,7 +24,7 @@ class Village:
 
 @dataclass(frozen=True)
 class FarmVillage(Village):
-    production: int  # total resources per hour
+    production: int  # total resources per hour, all types added
 
 
 @dataclass(frozen=True)

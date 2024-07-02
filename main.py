@@ -9,8 +9,9 @@ from credentials import username, password
 
 
 if __name__ == "__main__":
-    targets = [prairie, farm17, farm8, farm18, farm11, farm9]
     d = Driver()
+    targets1 = [prairie, farm17, farm18]  # , farm8, farm9, farm6, farm11]
+    targets2 = [farm13]  # , farm2]
     asyncio.run(
         run_all(
             keep_logged_in(d, username, password),

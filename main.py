@@ -1,4 +1,6 @@
 import asyncio
+
+from selenium.webdriver import ChromeOptions
 from trabot.driver import Driver
 from trabot.core import forever_static, run_all, keep_logged_in, forever
 from trabot.commands import saturate_raid, build_in_stable
@@ -9,9 +11,11 @@ from credentials import username, password
 
 
 if __name__ == "__main__":
-    d = Driver()
     targets1 = [prairie, farm17, farm18]  # , farm8, farm9, farm6, farm11]
     targets2 = [farm13]  # , farm2]
+    o = ChromeOptions()
+    o.add_argument("--headless=new")
+    d = Driver(options=o)
     asyncio.run(
         run_all(
             keep_logged_in(d, username, password),

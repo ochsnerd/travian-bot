@@ -28,15 +28,18 @@ def saturate_raid(
     source: PlayerVillage,
     unit: Unit,
     target: FarmVillage,
+    saturation_factor: float = 1,
     interval: float = 300,
 ) -> float:
     production = target.production / 3600
-    units_to_send = math.ceil(production * interval / unit.carrying_capacity)
+    units_to_send = math.ceil(
+        saturation_factor * production * interval / unit.carrying_capacity
+    )
     time_to_return = 2 * raid(
         driver,
         SendTroopsSpecification(source, Raid, [(units_to_send, unit)], target),
     )
     print(
-        f"Need {units_to_send * time_to_return / interval:5.1f} {unit} in {source} for full saturation"
+        f"Need {units_to_send * time_to_return / interval:5.1f} {unit} in {source} for {saturation_factor:2.1f} saturation"
     )
     return interval

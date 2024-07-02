@@ -27,14 +27,21 @@ if __name__ == "__main__":
                 lambda: build_in_stable(d, something_nice, 1, EquitesImperatoris),
                 71,
             ),
-            forever(
-                lambda: saturate_raid(d, davids_village_11, EquitesImperatoris, farm13)
-            ),
             *[
                 forever(
-                    lambda t=t: saturate_raid(d, something_nice, EquitesImperatoris, t)
+                    lambda t=t: saturate_raid(
+                        d, davids_village_11, EquitesImperatoris, t, 1.2
+                    )
                 )
-                for t in targets
+                for t in targets2
+            ],
+            *[
+                forever(
+                    lambda t=t: saturate_raid(
+                        d, something_nice, EquitesImperatoris, t, 1.2
+                    )
+                )
+                for t in targets1
             ],
         )
     )

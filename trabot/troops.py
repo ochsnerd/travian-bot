@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import time
 
 from .locations import PlayerVillage, Village
 from .buildings import Building, Stable, Barracks, BuildingScreen
@@ -73,9 +74,11 @@ class SendTroopsScreen(StaticScreen):
         self.driver.retrieve(f"[value='{kind.value}']").click()
 
     def send(self) -> float:
+        time.sleep(0.1)
         self.driver.retrieve("[name=s1]").click()
         try:
             arrives_in = self.parse_timestamp(self.driver.retrieve(".in").text)
+            time.sleep(0.1)
             self.driver.retrieve("[name=s1]").click()
         except NoSuchElementException:
             raise ResourceException(

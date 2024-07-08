@@ -4,6 +4,9 @@ from urllib.parse import urlunparse
 from dataclasses import dataclass, field
 from typing import Coroutine, Self, Callable, TYPE_CHECKING
 
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.remote.webelement import WebElement
+
 # TODO: ugly
 if TYPE_CHECKING:
     from .locations import PlayerVillage
@@ -66,31 +69,6 @@ class StaticScreen:
         self.driver.goto(HOME)
 
 
-async def forever(f: Callable[[], float], backoff_base: float = 10, quiet: bool = True):
-    fails = 0
-    while True:
-        try:
-            t = f()
-            fails = 0
-        except Exception as e:
-            print(f"Problem: {e}")
-            fails += 1
-            t = backoff_base * fails
-        if not quiet:
-            print(f"Waiting for {t}s")
-        await asyncio.sleep(t)
-
-
-async def forever_static(
-    f: Callable[[], None], interval: float, backoff_base: float = 10
-):
-    def fun():
-        f()
-        return interval
-
-    await forever(fun, backoff_base)
-
-
 def login(driver: Driver, username: str, password: str) -> Driver:
     driver.goto(HOME)
     driver.retrieve("[name=user]").send_keys(username)
@@ -99,16 +77,51 @@ def login(driver: Driver, username: str, password: str) -> Driver:
     return driver
 
 
-async def keep_logged_in(driver: Driver, username: str, password: str):
-    login(driver, username, password)
-    await forever_static(lambda: driver.goto(HOME), 60)
-
-
 async def run_all(*tasks: Coroutine):
     async with asyncio.TaskGroup() as tg:
         for task in tasks:
             tg.create_task(task)
 
 
-class ResourceException(Exception):
+class TravianBotException(Exception):
     pass
+
+
+class ResourceException(TravianBotException):
+    pass
+
+
+class BuildingException(TravianBotException):
+    pass
+
+
+class UnexpectedBuildingException(BuildingException):
+    pass
+
+
+class NoBuildingThereException(BuildingException):
+    pass
+
+
+class PlotNotEmptyException(BuildingException):
+    pass
+
+
+class PremiumFeatureException(TravianBotException):
+    pass
+
+
+def upgrade(driver: Driver, what: str, where: str) -> None:
+    # TODO: Check nicca solution in discord to extract time
+    try:
+        build(driver.retrieve("a.build"))
+    except NoSuchElementException:
+        raise BuildingException(f"Cannot upgrade {what} in {where}.")
+    except PremiumFeatureException:
+        raise BuildingException(f"No free workers to upgrade {what} in {where}.")
+
+
+def build(link: WebElement) -> None:
+    if "master builder" in link.text:
+        raise PremiumFeatureException("Master builder")
+    link.click()

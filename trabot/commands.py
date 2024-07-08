@@ -1,11 +1,17 @@
 import math
+import random
+from pathlib import Path
+
+from .buildings import upgrade_or_build
+from .plan import peek, pop
+from .core import Id
 from .driver import Driver
-from .resources import get_resource_production, Crop
+from .resources import ResourceScreen, get_resource_production, Crop
 from .locations import PlayerVillage, FarmVillage
 from .troops import SendTroopsScreen, SendTroopsSpecification, StableScreen, Unit, Raid
 
 
-def build_in_stable(driver: Driver, village: PlayerVillage, n: int, kind: Unit) -> None:
+def train_in_stable(driver: Driver, village: PlayerVillage, n: int, kind: Unit) -> None:
     if get_resource_production(driver, village, Crop) < 10:
         print(f"Not Crop production in {village} to build {kind}.")
         return
@@ -15,12 +21,26 @@ def build_in_stable(driver: Driver, village: PlayerVillage, n: int, kind: Unit) 
         print(f"Building {n} {kind}.")
 
 
+def upgrade_random_resource(driver: Driver, village: PlayerVillage) -> None:
+    fieldId = Id(random.randrange(1, 19))
+    print(f"Upgrading Resource at Id={fieldId.value} in {village}")
+    with ResourceScreen(driver, village, fieldId) as rs:
+        rs.upgrade()
+
+
 def raid(
     driver: Driver,
     order: SendTroopsSpecification,
 ) -> float:
     print(f"Raiding {order.target} with {order.units}.")
     return 5 + 2 * SendTroopsScreen.execute(driver, order)
+
+
+def build_next(driver: Driver, village: PlayerVillage, plan: Path) -> None:
+    building = peek(plan)
+    print(f"Building {building} in {village}.")
+    upgrade_or_build(driver, village, building)
+    pop(plan)
 
 
 def saturate_raid(
